@@ -1,0 +1,31 @@
+# Build output
+.next
+.vercel
+dist
+build
+
+# Dependencies
+node_modules
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode
+.idea
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
