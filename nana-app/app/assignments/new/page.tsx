@@ -22,6 +22,7 @@ export default function NewAssignment() {
   const [parsedAssignments, setParsedAssignments] = useState<ParsedAssignment[]>([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchCourses()
@@ -41,64 +42,153 @@ export default function NewAssignment() {
     }
   }
 
+  const validateFormat = (lines: string[]): { isValid: boolean; errorMessage?: string } => {
+    // 4行セットの検証
+    if (lines.length % 4 !== 0) {
+      return {
+        isValid: false,
+        errorMessage: `入力データが不正です。4行セット（科目名→種別→タイトル→締切）で入力してください。現在の行数: ${lines.length}行`
+      }
+    }
+
+    // 各セットの内容を検証
+    for (let i = 0; i < lines.length; i += 4) {
+      const subject = lines[i]?.trim()
+      const category = lines[i + 1]?.trim()
+      const title = lines[i + 2]?.trim()
+      const deadline = lines[i + 3]?.trim()
+
+      // 空行チェック
+      if (!subject || !category || !title || !deadline) {
+        return {
+          isValid: false,
+          errorMessage: `${Math.floor(i / 4) + 1}番目の課題データに空行があります。4行全てに内容を入力してください。`
+        }
+      }
+
+      // 日付形式チェック
+      const datePattern = /\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}(\s+\d{1,2}:\d{2})?/
+      if (!datePattern.test(deadline)) {
+        return {
+          isValid: false,
+          errorMessage: `${Math.floor(i / 4) + 1}番目の課題の締切日時が正しい形式ではありません。"YYYY/MM/DD HH:MM" 形式で入力してください。例: 2025/06/24 22:00`
+        }
+      }
+
+      // 種別チェック
+      const validCategories = ['レポート', '小テスト', '課題', '発表', 'テスト', '試験']
+      if (!validCategories.some(cat => category.includes(cat))) {
+        return {
+          isValid: false,
+          errorMessage: `${Math.floor(i / 4) + 1}番目の課題の種別が認識できません。"${category}" → レポート、小テスト、課題、発表などの種別を含めてください。`
+        }
+      }
+    }
+
+    return { isValid: true }
+  }
+
   const parseAssignments = () => {
-    if (!rawText.trim()) return
+    if (!rawText.trim()) {
+      setError('課題データを入力してください。')
+      return
+    }
 
     setLoading(true)
+    setError(null)
+    
     try {
-      // 簡単なパースロジック（実際のプロジェクトではより高度なパースが必要）
       const lines = rawText.split('\n').filter(line => line.trim())
+      
+      // フォーマット検証
+      const validation = validateFormat(lines)
+      if (!validation.isValid) {
+        setError(validation.errorMessage!)
+        setLoading(false)
+        return
+      }
+
       const assignments: ParsedAssignment[] = []
 
-      for (const line of lines) {
-        // 基本的なパターンマッチング
-        let subject = ''
-        let title = line.trim()
-        let category = 'レポート'
+      // 4行セットでパース（科目名→種別→タイトル→締切）
+      for (let i = 0; i < lines.length; i += 4) {
+        const subject = lines[i].trim()
+        const category = lines[i + 1].trim()
+        const title = lines[i + 2].trim()
+        const deadlineText = lines[i + 3].trim()
+
+        // 締切日時をパース
         let deadline = ''
-
-        // 科目名を抽出（括弧内または最初の単語）
-        const subjectMatch = line.match(/【(.+?)】|「(.+?)」|［(.+?)］/)
-        if (subjectMatch) {
-          subject = subjectMatch[1] || subjectMatch[2] || subjectMatch[3]
-          title = title.replace(subjectMatch[0], '').trim()
+        
+        try {
+          // YYYY/MM/DD HH:MM 形式を処理
+          const dateTimeMatch = deadlineText.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})\s+(\d{1,2}):(\d{2})/)
+          if (dateTimeMatch) {
+            const year = parseInt(dateTimeMatch[1])
+            const month = parseInt(dateTimeMatch[2])
+            const day = parseInt(dateTimeMatch[3])
+            const hour = parseInt(dateTimeMatch[4])
+            const minute = parseInt(dateTimeMatch[5])
+            
+            const parsedDate = new Date(year, month - 1, day, hour, minute)
+            if (isNaN(parsedDate.getTime())) {
+              throw new Error(`無効な日付: ${deadlineText}`)
+            }
+            deadline = parsedDate.toISOString()
+          } else {
+            // その他の日付形式を試行
+            const dateMatch = deadlineText.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/)
+            if (dateMatch) {
+              const year = parseInt(dateMatch[1])
+              const month = parseInt(dateMatch[2])
+              const day = parseInt(dateMatch[3])
+              
+              const parsedDate = new Date(year, month - 1, day, 23, 59)
+              if (isNaN(parsedDate.getTime())) {
+                throw new Error(`無効な日付: ${deadlineText}`)
+              }
+              deadline = parsedDate.toISOString()
+            } else {
+              throw new Error(`日付形式が認識できません: ${deadlineText}`)
+            }
+          }
+        } catch (dateError) {
+          setError(`${Math.floor(i / 4) + 1}番目の課題の日付解析エラー: ${dateError instanceof Error ? dateError.message : '不明なエラー'}`)
+          setLoading(false)
+          return
         }
 
-        // 課題タイプを抽出
-        if (line.includes('小テスト') || line.includes('quiz')) {
-          category = '小テスト'
-        } else if (line.includes('レポート') || line.includes('report')) {
-          category = 'レポート'
-        } else if (line.includes('課題') || line.includes('assignment')) {
-          category = '課題'
-        }
-
-        // 締切日を抽出
-        const dateMatch = line.match(/(\d{1,2})[\/\-月](\d{1,2})[\/\-日]?(\d{4})?|\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/)
-        if (dateMatch) {
-          const now = new Date()
-          const year = dateMatch[3] ? parseInt(dateMatch[3]) : now.getFullYear()
-          const month = parseInt(dateMatch[1])
-          const day = parseInt(dateMatch[2])
-          deadline = new Date(year, month - 1, day, 23, 59).toISOString()
-        } else {
-          // デフォルトで1週間後
-          const nextWeek = new Date()
-          nextWeek.setDate(nextWeek.getDate() + 7)
-          deadline = nextWeek.toISOString()
+        // 種別を正規化
+        let normalizedCategory = category
+        if (category.includes('小テスト') || category.includes('テスト') || category.includes('試験')) {
+          normalizedCategory = '小テスト'
+        } else if (category.includes('レポート')) {
+          normalizedCategory = 'レポート'
+        } else if (category.includes('課題')) {
+          normalizedCategory = '課題'
+        } else if (category.includes('発表')) {
+          normalizedCategory = '発表'
         }
 
         assignments.push({
-          subject: subject || '未分類',
-          title: title || line.trim(),
-          category,
+          subject: subject,
+          title: title,
+          category: normalizedCategory,
           deadline
         })
       }
 
+      if (assignments.length === 0) {
+        setError('有効な課題データが見つかりませんでした。正しいフォーマットで入力してください。')
+        setLoading(false)
+        return
+      }
+
       setParsedAssignments(assignments)
+      setError(null) // 成功時はエラーをクリア
     } catch (error) {
       console.error('Error parsing assignments:', error)
+      setError(error instanceof Error ? error.message : '課題の解析中にエラーが発生しました。')
     } finally {
       setLoading(false)
     }
@@ -189,9 +279,9 @@ export default function NewAssignment() {
                 <textarea
                   value={rawText}
                   onChange={(e) => setRawText(e.target.value)}
-                  placeholder="例:&#10;【情報社会論】レポート課題 12/25まで&#10;【データベース】小テスト 12/20 23:59まで&#10;【プログラミング】課題提出 12/30"
-                  className="w-full h-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={6}
+                  placeholder="4行セットで入力してください：&#10;情報社会論Ｂ&#10;レポート&#10;2025年度「情報社会論B」中間レポート課題（Part.1）&#10;2025/06/24 22:00&#10;&#10;ビジネスと法Ａ〔Ｍ〕&#10;小テスト&#10;第９回　小テスト&#10;2025/06/26 06:00"
+                  className="w-full h-40 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={8}
                 />
               </div>
               <button
@@ -202,6 +292,27 @@ export default function NewAssignment() {
                 <Sparkles className="h-4 w-4 mr-2" />
                 {loading ? '解析中...' : '自動解析'}
               </button>
+              
+              {/* エラー表示 */}
+              {error && (
+                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-red-800">
+                        入力エラー
+                      </h3>
+                      <div className="mt-2 text-sm text-red-700">
+                        <p>{error}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

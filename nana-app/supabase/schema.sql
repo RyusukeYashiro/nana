@@ -4,7 +4,11 @@ CREATE TABLE courses (
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   code TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  professor TEXT, -- 担当教授
+  semester TEXT, -- 学期情報（例：2025年前期）
+  credits INTEGER DEFAULT 1, -- 単位数
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- 課題テーブル
@@ -12,10 +16,14 @@ CREATE TABLE assignments (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
-  category TEXT,
+  category TEXT CHECK (category IN ('レポート', '小テスト', '課題', '発表', 'テスト', '試験')),
   deadline TIMESTAMP WITH TIME ZONE NOT NULL,
+  description TEXT, -- 課題の詳細説明
+  status TEXT DEFAULT '未完了' CHECK (status IN ('未完了', '進行中', '完了')),
+  priority INTEGER DEFAULT 1 CHECK (priority BETWEEN 1 AND 5), -- 優先度（1:低 〜 5:高）
   calendar_event_id TEXT, -- Googleカレンダーイベント ID
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- 講義テーブル
@@ -103,3 +111,33 @@ CREATE POLICY "Users can view their own tokens" ON user_tokens FOR SELECT USING 
 CREATE POLICY "Users can insert their own tokens" ON user_tokens FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update their own tokens" ON user_tokens FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete their own tokens" ON user_tokens FOR DELETE USING (auth.uid() = user_id);
+
+-- インデックス作成（パフォーマンス向上）
+CREATE INDEX idx_courses_user_id ON courses(user_id);
+CREATE INDEX idx_assignments_course_id ON assignments(course_id);
+CREATE INDEX idx_assignments_deadline ON assignments(deadline);
+CREATE INDEX idx_assignments_status ON assignments(status);
+CREATE INDEX idx_lectures_course_id ON lectures(course_id);
+CREATE INDEX idx_lectures_date ON lectures(date);
+CREATE INDEX idx_lecture_views_user_id ON lecture_views(user_id);
+CREATE INDEX idx_lecture_views_lecture_id ON lecture_views(lecture_id);
+CREATE INDEX idx_user_tokens_user_id ON user_tokens(user_id);
+
+-- updated_at自動更新のトリガー関数
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- トリガー設定
+CREATE TRIGGER update_courses_updated_at BEFORE UPDATE ON courses
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_assignments_updated_at BEFORE UPDATE ON assignments
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_user_tokens_updated_at BEFORE UPDATE ON user_tokens
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

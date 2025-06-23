@@ -1,7 +1,36 @@
+'use client'
+
 import Link from 'next/link'
 import { BookOpen, Calendar, Bell, Users } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
+import type { User } from '@supabase/supabase-js'
 
 export default function Home() {
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // 初回チェック
+    supabase.auth.getUser().then(({ data: { user }, error }) => {
+      console.log('🔍 Current user:', user)
+      if (error) console.error('❌ Error getting user:', error.message)
+      setUser(user)
+      setLoading(false)
+    })
+
+    // 認証状態の変更を監視
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔄 Auth event:', event, session?.user)
+      setUser(session?.user ?? null)
+      if (event === 'SIGNED_IN' && session?.user) {
+        // ログイン成功時にダッシュボードへリダイレクト
+        window.location.href = '/dashboard'
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -12,18 +41,34 @@ export default function Home() {
               <span className="text-2xl font-bold text-gray-900">Nana</span>
             </div>
             <div className="space-x-4">
-              <Link 
-                href="/auth/login"
-                className="text-gray-600 hover:text-gray-900 font-medium"
-              >
-                ログイン
-              </Link>
-              <Link 
-                href="/auth/signup"
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 font-medium"
-              >
-                始める
-              </Link>
+              {loading ? (
+                <div className="text-gray-500">読み込み中...</div>
+              ) : user ? (
+                <div className="flex items-center space-x-4">
+                  <span className="text-gray-700">ようこそ、{user.email}</span>
+                  <Link 
+                    href="/dashboard"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 font-medium"
+                  >
+                    ダッシュボード
+                  </Link>
+                </div>
+              ) : (
+                <>
+                  <Link 
+                    href="/auth/login"
+                    className="text-gray-600 hover:text-gray-900 font-medium"
+                  >
+                    ログイン
+                  </Link>
+                  <Link 
+                    href="/auth/signup"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 font-medium"
+                  >
+                    始める
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </header>
