@@ -9,7 +9,7 @@ export const securityHeaders = {
   'X-Frame-Options': 'DENY',
   'X-Content-Type-Options': 'nosniff',
   'Referrer-Policy': 'origin-when-cross-origin',
-  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
 }
 
 /**
@@ -17,7 +17,7 @@ export const securityHeaders = {
  */
 export function generateCSPHeader(): string {
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
-  
+
   const csp = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
@@ -28,7 +28,7 @@ export function generateCSPHeader(): string {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    "upgrade-insecure-requests"
+    'upgrade-insecure-requests',
   ].join('; ')
 
   return csp
@@ -65,7 +65,7 @@ export function validateRequest(request: NextRequest): {
 
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   }
 }
 
@@ -90,7 +90,7 @@ export function detectSQLInjection(input: string): boolean {
   const sqlPatterns = [
     /(\bUNION\b|\bSELECT\b|\bINSERT\b|\bUPDATE\b|\bDELETE\b|\bDROP\b)/i,
     /(--|\/\*|\*\/)/,
-    /(\b(OR|AND)\b\s+\d+\s*=\s*\d+)/i
+    /(\b(OR|AND)\b\s+\d+\s*=\s*\d+)/i,
   ]
 
   return sqlPatterns.some(pattern => pattern.test(input))
@@ -102,14 +102,14 @@ export function detectSQLInjection(input: string): boolean {
 export function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for')
   const realIP = request.headers.get('x-real-ip')
-  
+
   if (forwarded) {
     return forwarded.split(',')[0].trim()
   }
-  
+
   if (realIP) {
     return realIP
   }
-  
+
   return request.ip || 'unknown'
 }

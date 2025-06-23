@@ -8,20 +8,28 @@ export function useAssignments() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchAssignments = async () => {
+  const fetchAssignments = async (statusFilter?: string) => {
     try {
       setError(null)
-      
-      const { data: assignmentData, error: assignmentError } = await supabase
-        .from('assignments')
-        .select(`
+
+      let query = supabase.from('assignments').select(`
           *,
           courses!inner (
             name,
             code
           )
         `)
-        .order('deadline', { ascending: true })
+
+      // ステータスフィルターがある場合は適用
+      if (statusFilter) {
+        query = query.eq('status', statusFilter)
+      } else {
+        // デフォルトでは完了していない課題のみを表示
+        query = query.neq('status', '完了')
+      }
+
+      const { data: assignmentData, error: assignmentError } =
+        await query.order('deadline', { ascending: true })
 
       if (assignmentError) throw assignmentError
 
@@ -49,14 +57,14 @@ export function useAssignments() {
   }) => {
     try {
       setError(null)
-      
+
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('認証が必要です')
 
       // 科目を取得または作成
       let courseId = ''
-      let existingCourse = courses.find(c => 
-        c.name === data.subject || c.code === data.subject
+      let existingCourse = courses.find(
+        c => c.name === data.subject || c.code === data.subject
       )
 
       if (!existingCourse) {
@@ -64,7 +72,7 @@ export function useAssignments() {
           .from('courses')
           .insert({
             name: data.subject,
-            user_id: userData.user.id
+            user_id: userData.user.id,
           })
           .select()
           .single()
@@ -81,17 +89,18 @@ export function useAssignments() {
           course_id: courseId,
           title: data.title,
           category: data.category,
-          deadline: data.deadline
+          deadline: data.deadline,
         })
 
       if (assignmentError) throw assignmentError
 
       // データを再取得
       await fetchAssignments()
-      
+
       return { success: true }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '課題の作成に失敗しました'
+      const errorMessage =
+        err instanceof Error ? err.message : '課題の作成に失敗しました'
       setError(errorMessage)
       return { success: false, error: errorMessage }
     }
@@ -107,6 +116,6 @@ export function useAssignments() {
     loading,
     error,
     refetch: fetchAssignments,
-    createAssignment
+    createAssignment,
   }
 }

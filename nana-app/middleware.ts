@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
 
   // 認証が必要なページ
   const protectedPaths = ['/dashboard', '/assignments', '/lectures']
-  const isProtectedPath = protectedPaths.some(path => 
+  const isProtectedPath = protectedPaths.some(path =>
     request.nextUrl.pathname.startsWith(path)
   )
 
@@ -52,7 +52,7 @@ export async function middleware(request: NextRequest) {
 
   // 認証済みユーザーが認証ページにアクセスした場合、ダッシュボードにリダイレクト
   const authPaths = ['/auth/login', '/auth/signup']
-  const isAuthPath = authPaths.some(path => 
+  const isAuthPath = authPaths.some(path =>
     request.nextUrl.pathname.startsWith(path)
   )
 

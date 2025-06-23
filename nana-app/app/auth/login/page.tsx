@@ -15,7 +15,10 @@ export default function LoginPage() {
           </h2>
           <p className="mt-2 text-sm text-gray-600">
             または{' '}
-            <Link href="/auth/signup" className="font-medium text-blue-600 hover:text-blue-500">
+            <Link
+              href="/auth/signup"
+              className="font-medium text-blue-600 hover:text-blue-500"
+            >
               新しいアカウントを作成
             </Link>
           </p>

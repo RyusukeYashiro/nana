@@ -2,8 +2,8 @@ export function Form({
   action,
   children,
 }: {
-  action: any;
-  children: React.ReactNode;
+  action: any
+  children: React.ReactNode
 }) {
   return (
     <form
@@ -44,5 +44,5 @@ export function Form({
       </div>
       {children}
     </form>
-  );
+  )
 }

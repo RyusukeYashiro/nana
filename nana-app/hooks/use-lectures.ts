@@ -11,13 +11,14 @@ export function useLectures() {
   const fetchLectures = async () => {
     try {
       setError(null)
-      
+
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) return
 
       const { data: lectureData, error: lectureError } = await supabase
         .from('lectures')
-        .select(`
+        .select(
+          `
           *,
           courses!inner (
             name,
@@ -26,7 +27,8 @@ export function useLectures() {
           lecture_views!left (
             watched_at
           )
-        `)
+        `
+        )
         .order('date', { ascending: false })
 
       if (lectureError) throw lectureError
@@ -50,7 +52,7 @@ export function useLectures() {
   const toggleWatchStatus = async (lectureId: string, isWatched: boolean) => {
     try {
       setError(null)
-      
+
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('認証が必要です')
 
@@ -63,12 +65,10 @@ export function useLectures() {
 
         if (error) throw error
       } else {
-        const { error } = await supabase
-          .from('lecture_views')
-          .insert({
-            user_id: userData.user.id,
-            lecture_id: lectureId
-          })
+        const { error } = await supabase.from('lecture_views').insert({
+          user_id: userData.user.id,
+          lecture_id: lectureId,
+        })
 
         if (error) throw error
       }
@@ -76,7 +76,8 @@ export function useLectures() {
       await fetchLectures()
       return { success: true }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '視聴記録の更新に失敗しました'
+      const errorMessage =
+        err instanceof Error ? err.message : '視聴記録の更新に失敗しました'
       setError(errorMessage)
       return { success: false, error: errorMessage }
     }
@@ -85,7 +86,7 @@ export function useLectures() {
   const addSampleData = async () => {
     try {
       setError(null)
-      
+
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('認証が必要です')
 
@@ -94,7 +95,7 @@ export function useLectures() {
         .insert({
           name: '情報社会論',
           code: 'INFO101',
-          user_id: userData.user.id
+          user_id: userData.user.id,
         })
         .select()
         .single()
@@ -104,24 +105,25 @@ export function useLectures() {
       const lectures = [
         { title: '第1回: イントロダクション', date: '2024-04-10' },
         { title: '第2回: インターネットの歴史', date: '2024-04-17' },
-        { title: '第3回: SNSと社会', date: '2024-04-24' }
+        { title: '第3回: SNSと社会', date: '2024-04-24' },
       ]
 
       for (const lecture of lectures) {
-        await supabase
-          .from('lectures')
-          .insert({
-            course_id: course.id,
-            title: lecture.title,
-            date: lecture.date,
-            video_url: 'https://example.com/video'
-          })
+        await supabase.from('lectures').insert({
+          course_id: course.id,
+          title: lecture.title,
+          date: lecture.date,
+          video_url: 'https://example.com/video',
+        })
       }
 
       await fetchLectures()
       return { success: true }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'サンプルデータの追加に失敗しました'
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'サンプルデータの追加に失敗しました'
       setError(errorMessage)
       return { success: false, error: errorMessage }
     }
@@ -138,6 +140,6 @@ export function useLectures() {
     error,
     refetch: fetchLectures,
     toggleWatchStatus,
-    addSampleData
+    addSampleData,
   }
 }

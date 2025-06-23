@@ -1,7 +1,7 @@
-import Link from 'next/link';
-import { Form } from 'app/form';
-import { signIn } from 'app/auth';
-import { SubmitButton } from 'app/submit-button';
+import Link from 'next/link'
+import { Form } from 'app/form'
+import { signIn } from 'app/auth'
+import { SubmitButton } from 'app/submit-button'
 
 export default function Login() {
   return (
@@ -15,12 +15,12 @@ export default function Login() {
         </div>
         <Form
           action={async (formData: FormData) => {
-            'use server';
+            'use server'
             await signIn('credentials', {
               redirectTo: '/protected',
               email: formData.get('email') as string,
               password: formData.get('password') as string,
-            });
+            })
           }}
         >
           <SubmitButton>Sign in</SubmitButton>
@@ -34,5 +34,5 @@ export default function Login() {
         </Form>
       </div>
     </div>
-  );
+  )
 }

@@ -33,12 +33,12 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "courses_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: 'courses_user_id_fkey'
+            columns: ['user_id']
             isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
         ]
       }
       assignments: {
@@ -48,8 +48,12 @@ export interface Database {
           title: string
           category: string | null
           deadline: string
+          description: string | null
+          status: string
+          priority: number
           calendar_event_id: string | null
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
@@ -57,8 +61,12 @@ export interface Database {
           title: string
           category?: string | null
           deadline: string
+          description?: string | null
+          status?: string
+          priority?: number
           calendar_event_id?: string | null
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
@@ -66,17 +74,21 @@ export interface Database {
           title?: string
           category?: string | null
           deadline?: string
+          description?: string | null
+          status?: string
+          priority?: number
           calendar_event_id?: string | null
           created_at?: string
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "assignments_course_id_fkey"
-            columns: ["course_id"]
+            foreignKeyName: 'assignments_course_id_fkey'
+            columns: ['course_id']
             isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          }
+            referencedRelation: 'courses'
+            referencedColumns: ['id']
+          },
         ]
       }
       lectures: {
@@ -106,12 +118,12 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "lectures_course_id_fkey"
-            columns: ["course_id"]
+            foreignKeyName: 'lectures_course_id_fkey'
+            columns: ['course_id']
             isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          }
+            referencedRelation: 'courses'
+            referencedColumns: ['id']
+          },
         ]
       }
       lecture_views: {
@@ -135,19 +147,19 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "lecture_views_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: 'lecture_views_user_id_fkey'
+            columns: ['user_id']
             isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
+            referencedRelation: 'users'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "lecture_views_lecture_id_fkey"
-            columns: ["lecture_id"]
+            foreignKeyName: 'lecture_views_lecture_id_fkey'
+            columns: ['lecture_id']
             isOneToOne: false
-            referencedRelation: "lectures"
-            referencedColumns: ["id"]
-          }
+            referencedRelation: 'lectures'
+            referencedColumns: ['id']
+          },
         ]
       }
       user_tokens: {
@@ -183,27 +195,19 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "user_tokens_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: 'user_tokens_user_id_fkey'
+            columns: ['user_id']
             isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
         ]
       }
     }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      [_ in never]: never
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+    Views: Record<string, never>
+    Functions: Record<string, never>
+    Enums: Record<string, never>
+    CompositeTypes: Record<string, never>
   }
 }
 

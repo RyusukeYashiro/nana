@@ -1,9 +1,9 @@
-'use client';
+'use client'
 
-import { useFormStatus } from 'react-dom';
+import { useFormStatus } from 'react-dom'
 
 export function SubmitButton({ children }: { children: React.ReactNode }) {
-  const { pending } = useFormStatus();
+  const { pending } = useFormStatus()
 
   return (
     <button
@@ -38,5 +38,5 @@ export function SubmitButton({ children }: { children: React.ReactNode }) {
         {pending ? 'Loading' : 'Submit form'}
       </span>
     </button>
-  );
+  )
 }

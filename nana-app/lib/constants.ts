@@ -9,7 +9,7 @@ export const ASSIGNMENT_CATEGORIES = [
   '課題',
   '発表',
   'プロジェクト',
-  'その他'
+  'その他',
 ] as const
 
 // Date constraints
@@ -23,7 +23,7 @@ export const LIMITS = {
   CODE_MAX_LENGTH: 20,
   URL_MAX_LENGTH: 500,
   PASSWORD_MIN_LENGTH: 6,
-  EMAIL_MAX_LENGTH: 254
+  EMAIL_MAX_LENGTH: 254,
 } as const
 
 // Error messages
@@ -40,12 +40,12 @@ export const ERROR_MESSAGES = {
   CODE_TOO_LONG: `科目コードは${LIMITS.CODE_MAX_LENGTH}文字以内で入力してください`,
   AUTHENTICATION_REQUIRED: '認証が必要です',
   UNAUTHORIZED: 'この操作を実行する権限がありません',
-  SERVER_ERROR: 'サーバーエラーが発生しました'
+  SERVER_ERROR: 'サーバーエラーが発生しました',
 } as const
 
 // API rate limiting
 export const RATE_LIMITS = {
   DEFAULT: 100, // requests per minute
   AUTH: 10, // login/signup attempts per minute
-  SEARCH: 50 // search requests per minute
+  SEARCH: 50, // search requests per minute
 } as const

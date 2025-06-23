@@ -1,7 +1,7 @@
-import { auth, signOut } from 'app/auth';
+import { auth, signOut } from 'app/auth'
 
 export default async function ProtectedPage() {
-  let session = await auth();
+  const session = await auth()
 
   return (
     <div className="flex h-screen bg-black">
@@ -10,18 +10,18 @@ export default async function ProtectedPage() {
         <SignOut />
       </div>
     </div>
-  );
+  )
 }
 
 function SignOut() {
   return (
     <form
       action={async () => {
-        'use server';
-        await signOut();
+        'use server'
+        await signOut()
       }}
     >
       <button type="submit">Sign out</button>
     </form>
-  );
+  )
 }

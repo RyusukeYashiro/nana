@@ -15,7 +15,10 @@ export default function SignupPage() {
           </h2>
           <p className="mt-2 text-sm text-gray-600">
             または{' '}
-            <Link href="/auth/login" className="font-medium text-blue-600 hover:text-blue-500">
+            <Link
+              href="/auth/login"
+              className="font-medium text-blue-600 hover:text-blue-500"
+            >
               既存のアカウントにログイン
             </Link>
           </p>

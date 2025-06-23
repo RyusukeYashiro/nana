@@ -27,7 +27,8 @@ export function useAuth() {
 
       return { success: true }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'ログインに失敗しました'
+      const errorMessage =
+        err instanceof Error ? err.message : 'ログインに失敗しました'
       setError(errorMessage)
       return { success: false, error: errorMessage }
     } finally {
@@ -44,16 +45,17 @@ export function useAuth() {
         email: data.email,
         password: data.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`
-        }
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       })
 
       if (error) throw error
 
       if (authData.user && !authData.user.email_confirmed_at) {
-        return { 
-          success: true, 
-          message: '確認メールを送信しました。メールのリンクをクリックしてアカウントを有効化してください。' 
+        return {
+          success: true,
+          message:
+            '確認メールを送信しました。メールのリンクをクリックしてアカウントを有効化してください。',
         }
       } else if (authData.user) {
         router.push('/dashboard')
@@ -63,7 +65,8 @@ export function useAuth() {
 
       return { success: true }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'アカウント作成に失敗しました'
+      const errorMessage =
+        err instanceof Error ? err.message : 'アカウント作成に失敗しました'
       setError(errorMessage)
       return { success: false, error: errorMessage }
     } finally {
@@ -77,14 +80,15 @@ export function useAuth() {
       setError(null)
 
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google'
+        provider: 'google',
       })
 
       if (error) throw error
 
       return { success: true }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Googleログインに失敗しました'
+      const errorMessage =
+        err instanceof Error ? err.message : 'Googleログインに失敗しました'
       setError(errorMessage)
       return { success: false, error: errorMessage }
     } finally {
@@ -105,7 +109,8 @@ export function useAuth() {
 
       return { success: true }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'ログアウトに失敗しました'
+      const errorMessage =
+        err instanceof Error ? err.message : 'ログアウトに失敗しました'
       setError(errorMessage)
       return { success: false, error: errorMessage }
     } finally {
@@ -119,6 +124,6 @@ export function useAuth() {
     login,
     signup,
     loginWithGoogle,
-    logout
+    logout,
   }
 }

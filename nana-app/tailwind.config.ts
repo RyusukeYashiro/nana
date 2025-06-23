@@ -1,11 +1,11 @@
-import type { Config } from 'tailwindcss';
+import type { Config } from 'tailwindcss'
 
 export default {
   content: [
-    './app/**/*.{ts,tsx}', 
+    './app/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
-    './content/**/*.mdx', 
-    './public/**/*.svg'
+    './content/**/*.mdx',
+    './public/**/*.svg',
   ],
   theme: {
     extend: {
@@ -69,4 +69,4 @@ export default {
     hoverOnlyWhenSupported: true,
   },
   plugins: [],
-} satisfies Config;
+} satisfies Config

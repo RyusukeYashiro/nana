@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 const navigation = [
   { name: 'ダッシュボード', href: '/dashboard', icon: BookOpen },
   { name: '課題管理', href: '/assignments/new', icon: Calendar },
-  { name: '授業視聴', href: '/lectures', icon: Play }
+  { name: '授業視聴', href: '/lectures', icon: Play },
 ]
 
 export function Navbar() {
@@ -30,9 +30,10 @@ export function Navbar() {
 
             {/* Navigation */}
             <nav className="hidden md:flex space-x-8">
-              {navigation.map((item) => {
+              {navigation.map(item => {
                 const Icon = item.icon
-                const isActive = pathname === item.href || 
+                const isActive =
+                  pathname === item.href ||
                   (item.href !== '/dashboard' && pathname.startsWith(item.href))
 
                 return (
@@ -66,7 +67,7 @@ export function Navbar() {
               <User className="w-4 h-4" />
               <span className="hidden sm:inline">アカウント</span>
             </Button>
-            
+
             <Button
               variant="outline"
               size="sm"
@@ -83,9 +84,10 @@ export function Navbar() {
         {/* Mobile navigation */}
         <div className="md:hidden border-t pt-2 pb-3">
           <div className="grid grid-cols-3 gap-2">
-            {navigation.map((item) => {
+            {navigation.map(item => {
               const Icon = item.icon
-              const isActive = pathname === item.href || 
+              const isActive =
+                pathname === item.href ||
                 (item.href !== '/dashboard' && pathname.startsWith(item.href))
 
               return (
