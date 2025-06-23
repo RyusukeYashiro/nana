@@ -12,7 +12,7 @@ export default function Home() {
 
   useEffect(() => {
     // 初回チェック
-    supabase.auth.getUser().then(({ data: { user }, error }) => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user)
       setLoading(false)
     })

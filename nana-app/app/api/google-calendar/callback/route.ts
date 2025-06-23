@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     }
 
     // ユーザー情報を取得
-    const { data: userData, error: userError } = await supabase.auth.getUser()
+    const { data: userData } = await supabase.auth.getUser()
 
     if (!userData.user) {
       return NextResponse.redirect(
