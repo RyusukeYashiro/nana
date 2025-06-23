@@ -11,7 +11,7 @@ export function formatDeadline(deadline: string): string {
   const diff = date.getTime() - now.getTime()
   const days = Math.ceil(diff / (1000 * 60 * 60 * 24))
 
-  if (days < 0) return '期限切れ'
+  if (days < 0) return '期限終了'
   if (days === 0) return '今日'
   if (days === 1) return '明日'
   return `${days}日後`
